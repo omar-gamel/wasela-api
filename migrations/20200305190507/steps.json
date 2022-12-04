@@ -1,0 +1,34 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "myAvailableDays",
+      "type": "Day",
+      "arity": "List"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "availableDays"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "PlaylistItem",
+      "field": "isActive"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Notification",
+      "field": "model",
+      "type": "NotificationModel",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Notification",
+      "field": "models"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "DeleteEnum",
+      "enum": "OrderStatus"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "TaskManager"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Order",
+      "field": "status"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "DeleteModel",
+      "model": "UserCourseDay"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "UserPathCourse"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Day",
+      "field": "availableFor",
+      "type": "User",
+      "arity": "List"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "UserCourse",
+      "field": "days"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "UserPath",
+      "field": "userPathCourses"
+    }
+  ]
+}

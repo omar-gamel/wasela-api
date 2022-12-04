@@ -1,0 +1,571 @@
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// _______________________
+
+model User {
+  id                     String                  @id @default(cuid())
+  email                  String                  @unique
+  name                   String
+  slug                   String                  @unique
+  about                  String?
+  phone                  String?
+  password               String?
+  avatar                 String?
+  isEmailVerified        Boolean                 @default(false)
+  isActive               Boolean                 @default(true)
+  roles                  Role                    @default(STUDENT)
+  age                    Int?
+  gender                 Gender?
+  country                String?
+  wishlist               Wishlist?
+  cart                   Cart?
+  wallet                 Wallet?
+  orders                 Order[]
+  purchases              Purchase[]
+  userCourses            UserCourse[]
+  userPaths              UserPath[]
+  userAssignments        UserAssignment[]
+  reviews                Review[]
+  events                 Event[]
+  socialAccounts         SocialAccount[]
+  notificationRecipients NotificationRecipient[]
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+}
+
+enum Role {
+  STUDENT INSTRUCTOR ADMIN
+}
+
+enum Gender {
+  MALE FEMALE
+}
+
+model SocialAccount {
+  id           String         @id @default(cuid())
+  user         User
+  providerId   String         @unique
+  providerName SocialProvider
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+enum SocialProvider {
+  GMAIL FACEBOOK TWITTER
+}
+
+model UserMailVerification {
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  verificationToken       String?
+  verificationTokenExpiry DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+model UserResetPassword {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// _______________________
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  icon        String
+  courses     Course[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// _______________________
+
+model Course {
+  id            String             @id @default(cuid())
+  name          String
+  slug          String             @unique
+  description   String
+  prerequisites String
+  requirements  String
+  deliverables  String[]
+  price         Float
+  image         String
+  promoVideo    String
+  totalHours    Int
+  softwareUsed  SoftwareUsed[]
+  level         CourseLevel
+  type          CourseType
+  status        CourseReviewStatus @default(PENDING)
+  isActive      Boolean            @default(true)
+  days          Day[]
+  instructor    User
+  category      Category
+  review        Review[]
+  paths         Path[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model SoftwareUsed {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum CourseLevel {
+  BEGINNER INTERMEDIATE ADVANVED
+}
+
+enum CourseType {
+  ONLINE OFFLINE
+}
+
+enum CourseReviewStatus {
+  PENDING ACCEPTED REJECTED
+}
+
+// _______________________
+
+model Day {
+  id          String       @id @default(cuid())
+  rank        Int
+  title       String
+  slug        String       @unique
+  course      Course
+  description String
+  attachments String[]
+  lectures    Lecture[]
+  assignments Assignment[]
+  comments    Comment[]
+  reviews     DayReview[]
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Lecture {
+  id        String   @id @default(cuid())
+  rank      Int
+  title     String
+  link      String
+  day       Day
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  link        String?
+  file        String?
+  description String?
+  day         Day
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model UserAssignment {
+  id                      String   @id @default(cuid())
+  day                     Day
+  author                  User
+  description             String?
+  files                   String[]
+  likes                   User[]   @relation("User_Likes")
+  appearOnSpecialWorkPage Boolean  @default(false)
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+model DayReview {
+  id        String   @id @default(cuid())
+  day       Day
+  author    User
+  dayRate   Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model Comment {
+  id         String   @id @default(cuid())
+  author     User
+  text       String
+  isActive   Boolean  @default(true)
+  isReported Boolean  @default(false)
+  reporters  User[]   @relation("Reporters_Comment")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// _______________________
+
+model Path {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  description    String
+  total_price    Float
+  discount_price Float
+  image          String
+  courses        Course[]
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// _______________________
+
+model Review {
+  id             String   @id @default(cuid())
+  author         User
+  course         Course
+  text           String
+  instructorRate Float
+  courseRate     Float
+  isActive       Boolean  @default(true)
+  isReported     Boolean  @default(false)
+  reporters      User[]   @relation("Reporters_Review")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// _______________________
+
+model Coupon {
+  id             String            @id @default(cuid())
+  code           String            @unique
+  isPercent      Boolean
+  amount         Float
+  startDate      DateTime
+  endDate        DateTime
+  isActive       Boolean           @default(true)
+  user           User
+  courses        Course[]
+  paths          Path[]
+  type           CouponAppliedType
+  original_noUse Int
+  noUse          Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+enum CouponAppliedType {
+  COURSES PATHS
+}
+
+// _______________________
+
+model Cart {
+  id         String     @id @default(cuid())
+  user       User
+  items      CartItem[]
+  totoalQty  Int
+  totalPrice Float
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  course    Course?
+  path      Path?
+  type      ItemType
+  coupon    Coupon?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ItemType {
+  COURSE PATH
+}
+
+// _______________________
+
+model Order {
+  id            String         @id @default(cuid())
+  orderNumber   Int
+  items         OrderItem[]
+  user          User
+  status        OrderStatus    @default(PENDING)
+  subTotalPrice Float
+  totalPrice    Float
+  fullName      String?
+  country       String?
+  paymentMethod PaymentMethods
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  price     Float
+  course    Course?
+  path      Path?
+  type      ItemType
+  coupon    Coupon?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentMethods {
+  CREDIT_CARD BANK_ACCOUNT PAYPAL WESTERN_UNION AMAN VODAFONE_CASH MOBI_CASH
+}
+
+enum OrderStatus {
+  PENDING APPROVED REJECTED
+}
+
+// _______________________
+
+model Purchase {
+  id            String         @id @default(cuid())
+  user          User
+  item          PurchaseItem
+  price         Float
+  paymentMethod PaymentMethods
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model PurchaseItem {
+  id        String   @id @default(cuid())
+  course    Course?
+  path      Path?
+  type      ItemType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model Wallet {
+  id        String   @id @default(cuid())
+  user      User
+  balance   Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  user      User
+  courses   Course[]
+  paths     Path[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model UserCourse {
+  id              String          @id @default(cuid())
+  user            User
+  course          Course
+  days            UserCourseDay[]
+  watchedLectures Lecture[]
+  progress        Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model UserCourseDay {
+  id        String   @id @default(cuid())
+  day       Day
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model UserPath {
+  id              String           @id @default(cuid())
+  user            User
+  path            Path
+  userPathCourses UserPathCourse[]
+  watchedLectures Lecture[]
+  progress        Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model UserPathCourse {
+  id        String          @id @default(cuid())
+  course    Course
+  days      UserCourseDay[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+// _______________________
+
+model SiteDetail {
+  id                 String   @id @default(cuid())
+  faqs               Faq[]
+  termsAndConditions String?
+  privacyAndPolices  String?
+  email              String?
+  number             String?
+  mission            String?
+  vision             String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  rank      Int
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model ContactUsMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model Section {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  description String
+  articles    Article[]
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Article {
+  id        String    @id @default(cuid())
+  image     String
+  text      String
+  comments  Comment[]
+  section   Section
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// _______________________
+
+model Playlist {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String
+  image       String
+  items       PlaylistItem[]
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model PlaylistItem {
+  id        String    @id @default(cuid())
+  rank      Int
+  title     String
+  link      String
+  likes     User[]
+  comments  Comment[]
+  playlist  Playlist
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// _______________________
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  image       String
+  startDate   DateTime
+  endDate     DateTime
+  place       String
+  interested  User[]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// _______________________
+
+model Notification {
+  id        String                  @id @default(cuid())
+  message   String
+  to        NotificationRecipient[]
+  models    NotificationModel?
+  type      NotificationType
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+}
+
+model NotificationModel {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NotificationRecipient {
+  id        String   @id @default(cuid())
+  user      User
+  isSeen    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum NotificationType {
+  EVENT_ALARM NEW_COURSE_SUBMITTED OFFLINE_ORDER_SUBMITTED PURCHASE REVIEW_REPORTED COMMENT_REPORTED
+}
+
+// _______________________
+
+model Graduates {
+  id        String   @id @default(cuid())
+  student   User
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// _______________________
+
+model TaskManager {
+  id        String   @id @default(cuid())
+  task_id   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
